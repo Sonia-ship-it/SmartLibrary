@@ -1,9 +1,11 @@
 import React from 'react'
+import Swal from 'sweetalert2'
 import { useSelector } from 'react-redux'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useCreateOrderMutation } from '../../redux/features/orders/ordersApi'
 export const CheckOut = () => {
         const cartItems=useSelector(state=> state.cart.cartItems)
         const totalPrice=cartItems.reduce((acc,item) => acc+item.newPrice, 0).toFixed(2)
@@ -15,22 +17,44 @@ export const CheckOut = () => {
             handleSubmit,
             formState: {errors}
         } = useForm()
-        const onSubmit=(data) => {
+        const [createOrder,{isLoading, error}] = useCreateOrderMutation();
+        const navigate= useNavigate();
+        const onSubmit= async(data) => {
+            console.log("Form submitted with data: ",data);
+            console.log("Current user: ",currentUser);
             const newOrder = {
             name: data.name,
             email: currentUser?.email,
             address: {
+                street: data.address,
                 city: data.city,
                 country: data.country,
                 state: data.state,
                 zipcode: data.zipcode,
             },
-            phone: data.phone,
+            phone: parseInt(data.phone,10),
             productIds: cartItems.map(item => item?._id),
-            totalPrice: totalPrice
+            totalPrice: parseFloat(totalPrice),
             }
-            console.log(newOrder)
+            try{
+                    await createOrder(newOrder).unwrap();
+                    Swal.fire({
+                        title: "Confirmed Order",
+                        text: "Your order placed successfully!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Yes, It's okay!"
+                    })
+                navigate("/orders");
+            }
+            catch(error) {
+                console.error("Error place an order", error)
+                alert("Failed to place an order")
+            }
         }
+        if(isLoading) return <div>Loading...</div>
   return (
     <div className="min-h-screen p-6 bg-gray-100 flex items-center justify-center">
     <div className="container max-w-screen-lg mx-auto">
@@ -55,6 +79,7 @@ export const CheckOut = () => {
                                     <input
                                        {...register("name", {required: true})}
                                         type="text" name="name" id="name" className="h-10 border mt-1 rounded px-4 w-full bg-gray-50"  />
+                                        {errors.name && <p className="text-red-500 text-xs mt-1">Full Name is required</p>}
                                 </div>
 
                                 <div className="md:col-span-5">
@@ -71,6 +96,7 @@ export const CheckOut = () => {
                                     <input
                                      {...register("phone", {required: true})}
                                         type="number" name="phone" id="phone" className="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="+123 456 7890" />
+                                        {errors.name && <p className="text-red-500 text-xs mt-1">Phone Number is required</p>}
                                 </div>
 
                                 <div className="md:col-span-3">
@@ -78,6 +104,7 @@ export const CheckOut = () => {
                                     <input
                                       {...register("address", {required: true})}
                                         type="text" name="address" id="address" className="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="" />
+                                        {errors.name && <p className="text-red-500 text-xs mt-1">Address/Street is required</p>}
                                 </div>
 
                                 <div className="md:col-span-2">
@@ -85,6 +112,7 @@ export const CheckOut = () => {
                                     <input
                                        {...register("city", {required: true})}
                                         type="text" name="city" id="city" className="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="" />
+                                        {errors.name && <p className="text-red-500 text-xs mt-1">City is required</p>}
                                 </div>
 
                                 <div className="md:col-span-2">
@@ -93,6 +121,7 @@ export const CheckOut = () => {
                                         <input
                                            {...register("country", {required: true})}
                                             name="country" id="country" placeholder="Country" className="px-4 appearance-none outline-none text-gray-800 w-full bg-transparent"  />
+                                            {errors.name && <p className="text-red-500 text-xs mt-1">Country is required</p>}
                                         <button tabIndex="-1" className="cursor-pointer outline-none focus:outline-none transition-all text-gray-300 hover:text-red-600">
                                             <svg className="w-4 h-4 mx-2 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -111,6 +140,7 @@ export const CheckOut = () => {
                                         <input 
                                         {...register("state", {required: true})}
                                         name="state" id="state" placeholder="State" className="px-4 appearance-none outline-none text-gray-800 w-full bg-transparent"  />
+                                        {errors.name && <p className="text-red-500 text-xs mt-1">State is required</p>}
                                         <button  className="cursor-pointer outline-none focus:outline-none transition-all text-gray-300 hover:text-red-600">
                                             <svg className="w-4 h-4 mx-2 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -128,6 +158,7 @@ export const CheckOut = () => {
                                     <input 
                                   {...register("zipcode", {required: true})}
                                     type="text" name="zipcode" id="zipcode" className="transition-all flex items-center h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="" />
+                                    {errors.name && <p className="text-red-500 text-xs mt-1">Zipcode is required</p>}
                                 </div>
 
                                 <div className="md:col-span-5 mt-3">
@@ -141,7 +172,7 @@ export const CheckOut = () => {
                                 <div className="md:col-span-5 text-right">
                                     <div className="inline-flex items-end">
                                         <button 
-                                        // type='submit'
+                                        type='submit'
                                         disabled={!isChecked}
                                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Place an Order</button>
                                     </div>

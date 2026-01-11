@@ -9,7 +9,7 @@ export const Navbar = () => {
   const [IsDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigation = [
     {name: "Dashboard", href: "/dashboard"},
-    {name: "Orders", href: "/order"},
+    {name: "Orders", href: "/orders"},
     {name: "Cart Page", href: "/cart"},
     {name: "CheckOut", href: "/checkout"}
   ];
@@ -35,7 +35,7 @@ console.log('Navbar currentUser:', currentUser);
               <div>
                 {
                   currentUser ?
-                   <><button onClick={ () => setIsDropdownOpen(!IsDropdownOpen) }><img src={currentUser.photo || avatarImg} alt="avatar" className='size-6 rounded-full ring-2 ring-blue-500 mt-2'/></button>
+                   <><button onClick={ () => setIsDropdownOpen(!IsDropdownOpen) }><img src={avatarImg || currentUser.photo} alt="avatar" className='size-6 rounded-full ring-2 ring-blue-500 mt-2'/></button>
                    {
                    IsDropdownOpen && (
                     <div className='absolute rounded-md  mt-2  bg-white w-44 shadow-lg'>

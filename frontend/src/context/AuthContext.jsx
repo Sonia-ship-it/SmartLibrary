@@ -37,7 +37,7 @@ export const AuthProvide = ({children}) => {
         })
         return () => unsubscribe();
     }, [])
-    const value={currentUser, registerUser, loginUser, signInWithGoogle, logout}
+    const value={currentUser, registerUser, loginUser, signInWithGoogle,loading, logout}
     return(
         <AuthContext.Provider value={value}>
             {children}
