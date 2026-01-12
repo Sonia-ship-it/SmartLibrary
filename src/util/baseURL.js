@@ -1,4 +1,4 @@
 const getBaseUrL =() =>{
-    return "http://localhost:4000"
+    return "https://smart-library-backend.onrender.com";
 }
 export default getBaseUrL
